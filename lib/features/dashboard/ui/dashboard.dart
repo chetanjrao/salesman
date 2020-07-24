@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+import 'package:salesman/features/dashboard/bloc/dashboard_bloc.dart';
+import 'package:salesman/features/dashboard/bloc/dashboard_events.dart';
+import 'package:salesman/features/dashboard/bloc/dashboard_state.dart';
 import 'package:salesman/features/inventory/ui/inventory.dart';
 
 class Dashboard extends StatefulWidget {
@@ -57,7 +61,14 @@ class _DashboardState extends State<Dashboard> with SingleTickerProviderStateMix
               ),
             ),
             SliverToBoxAdapter(
-              child: Column(
+              child: BlocBuilder<DashboardBloc, DashboardState>(
+                builder: (context, state){
+                  if(state is DashboardInitial){
+                    BlocProvider.of<DashboardBloc>(context).add(FetchDashboardStatistics());
+                  }
+                  if(state is DashboardSuccess){
+
+                return Column(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   Container(
@@ -74,7 +85,7 @@ class _DashboardState extends State<Dashboard> with SingleTickerProviderStateMix
                             )
                           ),
                           TextSpan(
-                            text: "9,923.32",
+                            text: "${state.statistics.total}",
                             style: TextStyle(
                               fontSize: 32.0,
                               color: Colors.black,
@@ -92,17 +103,17 @@ class _DashboardState extends State<Dashboard> with SingleTickerProviderStateMix
                       children: <Widget>[
                         Container(
                           child: Text(
-                            "+ 1.23%",
+                            state.statistics.status < 0 ? "${state.statistics.status} %" : "+ ${state.statistics.status} %",
                             style: TextStyle(
-                              color: Color(0XFF0EA581)
+                              color: state.statistics.status < 0 ? Colors.red : Color(0XFF0EA581)
                             ),
                           )
                         ),
                         Container(
                           margin: EdgeInsets.only(left: 4.0, top: 1.0),
                           child: Icon(
-                            Feather.trending_up,
-                            color: Color(0XFF0EA581),
+                            state.statistics.status < 0 ? Feather.trending_down : Feather.trending_up,
+                            color: state.statistics.status < 0 ? Colors.red : Color(0XFF0EA581),
                             size: 16.0,
                           )
                         )
@@ -110,7 +121,12 @@ class _DashboardState extends State<Dashboard> with SingleTickerProviderStateMix
                     )
                   )
                 ],
-              ),
+              );
+                  } else {
+                    return Container();
+                  }
+                },
+              )
             ),
             SliverPersistentHeader(
               delegate: SliverHeaderDelegate(

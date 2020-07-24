@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+import 'package:salesman/features/dashboard/bloc/dashboard_bloc.dart';
+import 'package:salesman/features/dashboard/data/respository/dashboard_repository.dart';
 import 'package:salesman/features/dashboard/ui/dashboard.dart';
 import 'package:salesman/features/invoices/ui/invoice.dart';
 import 'package:salesman/features/profile/ui/profile.dart';
@@ -41,7 +44,9 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
 
-  int currentPage = 0;
+  int currentPage = 0;  
+  final DashboardRepository dashboardRepository = new DashboardRepository();
+
 
   void changePage(index){
     setState(() {
@@ -49,10 +54,13 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  Widget _buildWidget(index){
+  Widget _buildWidget(index, BuildContext context){
     switch(index){
       case 0:
-        return Dashboard();
+        return BlocProvider(
+          create: (context) => DashboardBloc(dashboardRepository: dashboardRepository),
+          child: Dashboard()
+        );
       case 1:
         return Invoice();
       case 2:
@@ -69,7 +77,7 @@ class _HomePageState extends State<HomePage> {
     return SafeArea(
       child: Scaffold(
         backgroundColor: Colors.white,
-        body: _buildWidget(currentPage),
+        body: _buildWidget(currentPage, context),
         bottomNavigationBar: BottomNavigationBar(
           backgroundColor: Colors.white,
           currentIndex: currentPage,
