@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:salesman/features/dashboard/bloc/dashboard_bloc.dart';
+import 'package:salesman/features/dashboard/bloc/dashboard_events.dart';
+import 'package:salesman/features/dashboard/bloc/dashboard_state.dart';
 import 'package:salesman/features/dashboard/data/respository/dashboard_repository.dart';
 import 'package:salesman/features/dashboard/ui/dashboard.dart';
 import 'package:salesman/features/invoices/ui/invoice.dart';
@@ -77,7 +79,18 @@ class _HomePageState extends State<HomePage> {
     return SafeArea(
       child: Scaffold(
         backgroundColor: Colors.white,
-        body: _buildWidget(currentPage, context),
+        body: IndexedStack(
+          children: <Widget>[
+            BlocProvider(
+              create: (context) => DashboardBloc(dashboardRepository: dashboardRepository),
+              child: Dashboard()
+            ),
+            Invoice(),
+            Transactions(),
+            Profile()
+          ],
+          index: currentPage,
+        ),
         bottomNavigationBar: BottomNavigationBar(
           backgroundColor: Colors.white,
           currentIndex: currentPage,

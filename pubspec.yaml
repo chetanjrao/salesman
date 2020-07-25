@@ -47,6 +47,8 @@ dependencies:
 
   intl: ^0.16.1
 
+  shimmer: ^1.1.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

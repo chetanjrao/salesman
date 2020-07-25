@@ -5,7 +5,9 @@ import 'package:intl/intl.dart';
 import 'package:salesman/features/dashboard/bloc/dashboard_bloc.dart';
 import 'package:salesman/features/dashboard/bloc/dashboard_events.dart';
 import 'package:salesman/features/dashboard/bloc/dashboard_state.dart';
+import 'package:salesman/features/dashboard/data/models/dashboard_models.dart';
 import 'package:salesman/features/inventory/ui/inventory.dart';
+import 'package:shimmer/shimmer.dart';
 
 class Dashboard extends StatefulWidget {
   @override
@@ -63,10 +65,10 @@ class _DashboardState extends State<Dashboard> with SingleTickerProviderStateMix
             ),
             SliverToBoxAdapter(
               child: BlocBuilder<DashboardBloc, DashboardState>(
-                builder: (context, state){
+                builder: (blocContext, state){
                   if(state is DashboardInitial){
-                    BlocProvider.of<DashboardBloc>(context).add(FetchDashboardStatistics());
-                    BlocProvider.of<DashboardBloc>(context).add(FetchRecentTransactions());
+                    context.bloc<DashboardBloc>().add(FetchDashboardStatistics());
+                    context.bloc<DashboardBloc>().add(FetchRecentTransactions());
                   }
                   if(state is DashboardSuccess){
 
@@ -142,11 +144,14 @@ class _DashboardState extends State<Dashboard> with SingleTickerProviderStateMix
         body: BlocBuilder<DashboardBloc, DashboardState>(
           builder: (context, state){
             if(state is DashboardSuccess){
+              List<RecentTransactions> allTransactions = state.transactions;
+              List<RecentTransactions> creditTransactions = state.transactions.where((element) => element.isCredit).toList();
+              List<RecentTransactions> debitTransactions = state.transactions.where((element) => !element.isCredit).toList();
             return TabBarView(
               controller: tabController,
               children: <Widget>[
                 ListView.builder(
-                  itemCount: state.transactions.length,
+                  itemCount: allTransactions.length,
                   itemBuilder: (context, index){
                     return Container(
                       padding: EdgeInsets.symmetric(vertical: 12.0),
@@ -162,7 +167,7 @@ class _DashboardState extends State<Dashboard> with SingleTickerProviderStateMix
                           ),
                           child: Center(
                             child: Icon(
-                              state.transactions[index].isCredit ? Feather.plus : Feather.arrow_right,
+                              allTransactions[index].isCredit ? Feather.plus : Feather.arrow_right,
                               color: Theme.of(context).primaryColor,
                             )
                           )
@@ -173,7 +178,7 @@ class _DashboardState extends State<Dashboard> with SingleTickerProviderStateMix
                           children: <Widget>[
                             Container(
                               child: Text(
-                                state.transactions[index].isCredit ? "Credit" : "Debit",
+                                allTransactions[index].isCredit ? "Credit" : "Debit",
                                 style: TextStyle(
                                   fontSize: 15.0
                                 ),
@@ -193,9 +198,9 @@ class _DashboardState extends State<Dashboard> with SingleTickerProviderStateMix
                         ),
                         trailing: Container(
                           child: Text(
-                            state.transactions[index].isCredit ? "+\u20b9${state.transactions[index].amount}": "\u20b9${state.transactions[index].amount}",
+                            allTransactions[index].isCredit ? "+\u20b9${state.transactions[index].amount}": "\u20b9${state.transactions[index].amount}",
                             style: TextStyle(
-                              color: state.transactions[index].isCredit ? Color(0XFF0EA581) : Color(0XFF131B26),
+                              color: allTransactions[index].isCredit ? Color(0XFF0EA581) : Color(0XFF131B26),
                               fontWeight: FontWeight.w500,
                               fontSize: 18.0
                             )
@@ -205,16 +210,206 @@ class _DashboardState extends State<Dashboard> with SingleTickerProviderStateMix
                     );
                   },
                 ),
-                Text("Credits"),
-                Text("Debits")
+                ListView.builder(
+                  itemCount: creditTransactions.length,
+                  itemBuilder: (context, index){
+                    return Container(
+                      padding: EdgeInsets.symmetric(vertical: 12.0),
+                      child: ListTile(
+                        leading: Container(
+                          width: 48.0,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: Colors.grey.withOpacity(0.5),
+                              width: 0.5
+                            )
+                          ),
+                          child: Center(
+                            child: Icon(
+                              creditTransactions[index].isCredit ? Feather.plus : Feather.arrow_right,
+                              color: Theme.of(context).primaryColor,
+                            )
+                          )
+                        ),
+                        title: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Container(
+                              child: Text(
+                                creditTransactions[index].isCredit ? "Credit" : "Debit",
+                                style: TextStyle(
+                                  fontSize: 15.0
+                                ),
+                              ),
+                            ),
+                            Container(
+                              margin: EdgeInsets.only(top: 6.0),
+                              child: Text(
+                                "${DateFormat.jm().format(DateTime.parse(creditTransactions[index].createdAt).toLocal())} ${DateFormat.yMMMMd('en_US').format(DateTime.parse(creditTransactions[index].createdAt).toLocal())} ",
+                                style: TextStyle(
+                                  color: Color(0XFF404864),
+                                  fontSize: 13.0
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
+                        trailing: Container(
+                          child: Text(
+                            creditTransactions[index].isCredit ? "+\u20b9${creditTransactions[index].amount}": "\u20b9${creditTransactions[index].amount}",
+                            style: TextStyle(
+                              color: creditTransactions[index].isCredit ? Color(0XFF0EA581) : Color(0XFF131B26),
+                              fontWeight: FontWeight.w500,
+                              fontSize: 18.0
+                            )
+                          )
+                        ),
+                      )
+                    );
+                  },
+                ),
+                ListView.builder(
+                  itemCount: debitTransactions.length,
+                  itemBuilder: (context, index){
+                    return Container(
+                      padding: EdgeInsets.symmetric(vertical: 12.0),
+                      child: ListTile(
+                        leading: Container(
+                          width: 48.0,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: Colors.grey.withOpacity(0.5),
+                              width: 0.5
+                            )
+                          ),
+                          child: Center(
+                            child: Icon(
+                              debitTransactions[index].isCredit ? Feather.plus : Feather.arrow_right,
+                              color: Theme.of(context).primaryColor,
+                            )
+                          )
+                        ),
+                        title: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Container(
+                              child: Text(
+                                debitTransactions[index].isCredit ? "Credit" : "Debit",
+                                style: TextStyle(
+                                  fontSize: 15.0
+                                ),
+                              ),
+                            ),
+                            Container(
+                              margin: EdgeInsets.only(top: 6.0),
+                              child: Text(
+                                "${DateFormat.jm().format(DateTime.parse(debitTransactions[index].createdAt).toLocal())} ${DateFormat.yMMMMd('en_US').format(DateTime.parse(debitTransactions[index].createdAt).toLocal())} ",
+                                style: TextStyle(
+                                  color: Color(0XFF404864),
+                                  fontSize: 13.0
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
+                        trailing: Container(
+                          child: Text(
+                            debitTransactions[index].isCredit ? "+\u20b9${state.transactions[index].amount}": "\u20b9${state.transactions[index].amount}",
+                            style: TextStyle(
+                              color: debitTransactions[index].isCredit ? Color(0XFF0EA581) : Color(0XFF131B26),
+                              fontWeight: FontWeight.w500,
+                              fontSize: 18.0
+                            )
+                          )
+                        ),
+                      )
+                    );
+                  },
+                )
               ],
             );
           } else {
             return Center(
-              child: CircularProgressIndicator(
-                backgroundColor: Theme.of(context).primaryColor,
-                strokeWidth: 2.0,
-              )
+              child: ListView.builder(
+                  itemCount: 5,
+                  itemBuilder: (context, index){
+                    return Container(
+                      padding: EdgeInsets.symmetric(vertical: 12.0),
+                      child: ListTile(
+                        leading: Shimmer.fromColors(
+                              baseColor: Colors.grey[200],
+                              highlightColor: Colors.grey[100],
+                              child: Container(
+                              width: 48.0,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.white,
+                                border: Border.all(
+                                  color: Colors.grey.withOpacity(0.5),
+                                  width: 0.5
+                                )
+                              )
+                            ),
+                        ),
+                        title: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Container(
+                              child: Shimmer.fromColors(
+                                baseColor: Colors.grey[200],
+                                highlightColor: Colors.grey[100],
+                                child: Container(
+                                  width: double.infinity,
+                                  height: 16.0,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(12.0),
+                                      color: Colors.white
+                                    ),
+                                )
+                              )
+                            ),
+                            Container(
+                              margin: EdgeInsets.only(top: 12.0),
+                              child: Container(
+                              child: Shimmer.fromColors(
+                                  baseColor: Colors.grey[200],
+                                  highlightColor: Colors.grey[100],
+                                  child: Container(
+                                    width: double.infinity,
+                                    height: 13.0,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(12.0),
+                                      color: Colors.white
+                                    ),
+                                  )
+                                )
+                              ),
+                            )
+                          ],
+                        ),
+                        trailing: Container(
+                          child: Shimmer.fromColors(
+                              baseColor: Colors.grey[200],
+                              highlightColor: Colors.grey[100],
+                              child: Container(
+                                height: 24,
+                                width: 24,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Colors.white
+                                    ),
+                              )
+                            )
+                        ),
+                      )
+                    );
+                  },
+                )
             );
           }
           }
