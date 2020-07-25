@@ -16,13 +16,15 @@ class DashboardLoading extends DashboardState {}
 
 class DashboardSuccess extends DashboardState {
   final DashboardStatistics statistics;
+  final List<RecentTransactions> transactions;
 
   const DashboardSuccess({
-    @required this.statistics
+    @required this.statistics,
+    @required this.transactions
   });
 
   @override
-  List<Object> get props => [statistics];
+  List<Object> get props => [statistics, transactions];
 
 }
 

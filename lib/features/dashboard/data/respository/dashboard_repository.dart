@@ -8,10 +8,14 @@ class DashboardRepository {
 
   Future<DashboardStatistics> getStatisticsData() async {
     Response _response = await _apiClient.getDashboardStatistics();
-    print(_response.body);
     DashboardStatistics _statistics = DashboardStatistics.fromJson(jsonDecode(_response.body));
     return _statistics;
   }
 
-  Future<dynamic> getRecentTransactionsData() async {}
+  Future<List<RecentTransactions>> getRecentTransactions() async {
+    Response _response = await _apiClient.getSalesmanTransactions();
+    List<dynamic> _parsedJson = jsonDecode(_response.body);
+    List<RecentTransactions> _transactions = _parsedJson.map((e) => RecentTransactions.fromJson(e)).toList();
+    return _transactions;
+  }
 }

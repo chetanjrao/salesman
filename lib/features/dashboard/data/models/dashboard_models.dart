@@ -19,3 +19,30 @@ class DashboardStatistics extends Equatable {
   }
 
 }
+
+class RecentTransactions extends Equatable {
+  final int id;
+  final double amount;
+  final bool isCredit;
+  final String createdAt;
+
+  RecentTransactions({
+    @required this.id,
+    @required this.amount,
+    @required this.isCredit,
+    @required this.createdAt
+  });
+
+  @override
+  List<Object> get props => [id, amount, isCredit, createdAt];
+
+  static RecentTransactions fromJson(dynamic json){
+    return RecentTransactions(
+      id: json["id"],
+      amount: json["amount"],
+      isCredit: json["is_credit"],
+      createdAt: json["created_at"]
+    );
+  }
+
+}

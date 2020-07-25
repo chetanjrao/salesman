@@ -16,14 +16,17 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
       yield DashboardLoading();
       try {
         final DashboardStatistics _statistics = await dashboardRepository.getStatisticsData();
+        final List<RecentTransactions> _transactions = await dashboardRepository.getRecentTransactions();
         yield DashboardSuccess(
-          statistics: _statistics
+          statistics: _statistics,
+          transactions: _transactions
         );
       } catch(error){
         print(error);
         yield DashboardError(error: error.toString());
       }
     }
+    
   } 
 
 }

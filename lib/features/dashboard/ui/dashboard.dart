@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+import 'package:intl/intl.dart';
 import 'package:salesman/features/dashboard/bloc/dashboard_bloc.dart';
 import 'package:salesman/features/dashboard/bloc/dashboard_events.dart';
 import 'package:salesman/features/dashboard/bloc/dashboard_state.dart';
@@ -65,6 +66,7 @@ class _DashboardState extends State<Dashboard> with SingleTickerProviderStateMix
                 builder: (context, state){
                   if(state is DashboardInitial){
                     BlocProvider.of<DashboardBloc>(context).add(FetchDashboardStatistics());
+                    BlocProvider.of<DashboardBloc>(context).add(FetchRecentTransactions());
                   }
                   if(state is DashboardSuccess){
 
@@ -137,72 +139,85 @@ class _DashboardState extends State<Dashboard> with SingleTickerProviderStateMix
             )
           ];
         }, 
-        body: TabBarView(
-          controller: tabController,
-          children: <Widget>[
-            ListView.builder(
-              itemCount: 20,
-              itemBuilder: (context, index){
-                return Container(
-                  padding: EdgeInsets.symmetric(vertical: 12.0),
-                  child: ListTile(
-                    leading: Container(
-                      width: 48.0,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: Colors.grey.withOpacity(0.5),
-                          width: 0.5
-                        )
-                      ),
-                      child: Center(
-                        child: Icon(
-                          index % 2 == 0 ? Feather.plus : Feather.arrow_right,
-                          color: Theme.of(context).primaryColor,
-                        )
-                      )
-                    ),
-                    title: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Container(
-                          child: Text(
-                            index % 2 == 0 ? "Credit" : "Debit",
-                            style: TextStyle(
-                              fontSize: 15.0
-                            ),
+        body: BlocBuilder<DashboardBloc, DashboardState>(
+          builder: (context, state){
+            if(state is DashboardSuccess){
+            return TabBarView(
+              controller: tabController,
+              children: <Widget>[
+                ListView.builder(
+                  itemCount: state.transactions.length,
+                  itemBuilder: (context, index){
+                    return Container(
+                      padding: EdgeInsets.symmetric(vertical: 12.0),
+                      child: ListTile(
+                        leading: Container(
+                          width: 48.0,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: Colors.grey.withOpacity(0.5),
+                              width: 0.5
+                            )
                           ),
+                          child: Center(
+                            child: Icon(
+                              state.transactions[index].isCredit ? Feather.plus : Feather.arrow_right,
+                              color: Theme.of(context).primaryColor,
+                            )
+                          )
                         ),
-                        Container(
-                          margin: EdgeInsets.only(top: 6.0),
-                          child: Text(
-                            "May 2, 9:24 PM",
-                            style: TextStyle(
-                              color: Color(0XFF404864),
-                              fontSize: 13.0
+                        title: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Container(
+                              child: Text(
+                                state.transactions[index].isCredit ? "Credit" : "Debit",
+                                style: TextStyle(
+                                  fontSize: 15.0
+                                ),
+                              ),
                             ),
-                          ),
-                        )
-                      ],
-                    ),
-                    trailing: Container(
-                      child: Text(
-                        index % 2 == 0 ? "+1,232.4": "965.0",
-                        style: TextStyle(
-                          color: index % 2 == 0 ? Color(0XFF0EA581) : Color(0XFF131B26),
-                          fontWeight: FontWeight.w500,
-                          fontSize: 18.0
-                        )
+                            Container(
+                              margin: EdgeInsets.only(top: 6.0),
+                              child: Text(
+                                "${DateFormat.jm().format(DateTime.parse(state.transactions[index].createdAt).toLocal())} ${DateFormat.yMMMMd('en_US').format(DateTime.parse(state.transactions[index].createdAt).toLocal())} ",
+                                style: TextStyle(
+                                  color: Color(0XFF404864),
+                                  fontSize: 13.0
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
+                        trailing: Container(
+                          child: Text(
+                            state.transactions[index].isCredit ? "+\u20b9${state.transactions[index].amount}": "\u20b9${state.transactions[index].amount}",
+                            style: TextStyle(
+                              color: state.transactions[index].isCredit ? Color(0XFF0EA581) : Color(0XFF131B26),
+                              fontWeight: FontWeight.w500,
+                              fontSize: 18.0
+                            )
+                          )
+                        ),
                       )
-                    ),
-                  )
-                );
-              },
-            ),
-            Text("Credits"),
-            Text("Debits")
-          ],
+                    );
+                  },
+                ),
+                Text("Credits"),
+                Text("Debits")
+              ],
+            );
+          } else {
+            return Center(
+              child: CircularProgressIndicator(
+                backgroundColor: Theme.of(context).primaryColor,
+                strokeWidth: 2.0,
+              )
+            );
+          }
+          }
         )
       ),
       floatingActionButton: FloatingActionButton(
