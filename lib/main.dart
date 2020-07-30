@@ -9,6 +9,8 @@ import 'package:salesman/features/dashboard/data/respository/dashboard_repositor
 import 'package:salesman/features/dashboard/ui/dashboard.dart';
 import 'package:salesman/features/invoices/data/repository/invoice_repository.dart';
 import 'package:salesman/features/invoices/ui/invoice.dart';
+import 'package:salesman/features/profile/bloc/profile_bloc.dart';
+import 'package:salesman/features/profile/data/respository/profile_repository.dart';
 import 'package:salesman/features/profile/ui/profile.dart';
 import 'package:salesman/features/transactions/ui/transactions.dart';
 
@@ -52,7 +54,7 @@ class _HomePageState extends State<HomePage> {
   int currentPage = 0;  
   final DashboardRepository dashboardRepository = new DashboardRepository();
   final InvoiceRepository invoiceRepository = new InvoiceRepository();
-
+  final ProfileRepository profileRepository = new ProfileRepository();
 
   void changePage(index){
     setState(() {
@@ -78,7 +80,10 @@ class _HomePageState extends State<HomePage> {
               child: Invoice(),
             ),
             Transactions(),
-            Profile()
+            BlocProvider(
+              create: (context) => ProfileBloc(profileRepository: profileRepository),
+              child: Profile(),
+            )
           ],
           index: currentPage,
         ),

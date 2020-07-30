@@ -50,4 +50,13 @@ class InstantKhataClient {
     );
   }
 
+  Future<http.Response> getProfileInfo() async {
+    return http.post(
+      "$API_URL/accounts/profile/",
+      headers: {
+        HttpHeaders.authorizationHeader: "Bearer $_accessToken"
+      }
+    );
+  }
+
 }
