@@ -7,9 +7,12 @@ import 'package:salesman/features/dashboard/bloc/dashboard_events.dart';
 import 'package:salesman/features/dashboard/bloc/dashboard_state.dart';
 import 'package:salesman/features/dashboard/data/respository/dashboard_repository.dart';
 import 'package:salesman/features/dashboard/ui/dashboard.dart';
+import 'package:salesman/features/invoices/data/repository/invoice_repository.dart';
 import 'package:salesman/features/invoices/ui/invoice.dart';
 import 'package:salesman/features/profile/ui/profile.dart';
 import 'package:salesman/features/transactions/ui/transactions.dart';
+
+import 'features/invoices/bloc/invoice_bloc.dart';
 
 
 void main() {
@@ -48,30 +51,13 @@ class _HomePageState extends State<HomePage> {
 
   int currentPage = 0;  
   final DashboardRepository dashboardRepository = new DashboardRepository();
+  final InvoiceRepository invoiceRepository = new InvoiceRepository();
 
 
   void changePage(index){
     setState(() {
       currentPage = index;
     });
-  }
-
-  Widget _buildWidget(index, BuildContext context){
-    switch(index){
-      case 0:
-        return BlocProvider(
-          create: (context) => DashboardBloc(dashboardRepository: dashboardRepository),
-          child: Dashboard()
-        );
-      case 1:
-        return Invoice();
-      case 2:
-        return Transactions();
-      case 3:
-        return Profile();
-      default:
-        return Text("hello");
-    }
   }
 
   @override
@@ -85,7 +71,12 @@ class _HomePageState extends State<HomePage> {
               create: (context) => DashboardBloc(dashboardRepository: dashboardRepository),
               child: Dashboard()
             ),
-            Invoice(),
+            BlocProvider(
+              create: (context) => InvoiceBloc(
+                invoiceRepository: invoiceRepository
+              ),
+              child: Invoice(),
+            ),
             Transactions(),
             Profile()
           ],
