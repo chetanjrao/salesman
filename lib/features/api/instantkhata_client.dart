@@ -41,4 +41,13 @@ class InstantKhataClient {
     );
   }
 
+  Future<http.Response> getInvoiceInfo(String invoiceID) async {
+    return http.get(
+      "$API_URL/distributors/invoices/info/$invoiceID/",
+      headers: {
+        HttpHeaders.authorizationHeader: "Bearer $_accessToken"
+      }
+    );
+  }
+
 }

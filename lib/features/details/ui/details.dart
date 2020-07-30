@@ -1,7 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+import 'package:salesman/features/details/bloc/details_bloc.dart';
+import 'package:salesman/features/details/bloc/details_event.dart';
+import 'package:salesman/features/details/bloc/details_state.dart';
+import 'package:shimmer/shimmer.dart';
 
 class Details extends StatefulWidget {
+
+  final String invoiceID;
+
+  const Details({Key key, @required this.invoiceID}) : super(key: key);
+
   @override
   _DetailsState createState() => _DetailsState();
 }
@@ -40,7 +50,7 @@ class _DetailsState extends State<Details> with SingleTickerProviderStateMixin {
                 children: <Widget>[
                   Container(
                     child: Text(
-                      "Details",
+                      "Invoice Details",
                       style: TextStyle(
                         color: Colors.black,
                         fontWeight: FontWeight.w500
@@ -50,7 +60,10 @@ class _DetailsState extends State<Details> with SingleTickerProviderStateMixin {
                 ],
               ),
             ),
-            SliverToBoxAdapter(
+           BlocBuilder<InvoiceDetailsBloc, InvoiceInfoState>(
+             builder: (context, state){
+              if(state is InvoiceInfoSuccessState){
+               return SliverToBoxAdapter(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
@@ -68,7 +81,7 @@ class _DetailsState extends State<Details> with SingleTickerProviderStateMixin {
                             )
                           ),
                           TextSpan(
-                            text: "9,923.32",
+                            text: "${state.invoiceInfo.invoiceInfo.total.toStringAsFixed(2)}",
                             style: TextStyle(
                               fontSize: 32.0,
                               color: Colors.black,
@@ -127,7 +140,14 @@ class _DetailsState extends State<Details> with SingleTickerProviderStateMixin {
                   )
                 ],
               ),
-            ),
+            );
+              } else {
+                return SliverToBoxAdapter(
+                  child: Container()
+                );
+              }
+             },
+           ),
             SliverPersistentHeader(
               delegate: SliverHeaderDelegate(
                 tabController: tabController
@@ -140,8 +160,14 @@ class _DetailsState extends State<Details> with SingleTickerProviderStateMixin {
         body: TabBarView(
           controller: tabController,
           children: <Widget>[
-            ListView.builder(
-              itemCount: 20,
+            BlocBuilder<InvoiceDetailsBloc, InvoiceInfoState>(
+              builder: (context, state){
+                if(state is InvoiceInfoInitialState){
+                  context.bloc<InvoiceDetailsBloc>().add(LoadInvoiceInfo(invoiceID: widget.invoiceID));
+                }
+                if(state is InvoiceInfoSuccessState){
+                  return ListView.builder(
+              itemCount: state.invoiceInfo.invoiceSales.length,
               itemBuilder: (context, index){
                 return Container(
                   padding: EdgeInsets.symmetric(vertical: 12.0),
@@ -157,7 +183,7 @@ class _DetailsState extends State<Details> with SingleTickerProviderStateMixin {
                       ),
                       child: Center(
                         child: Text(
-                          "20",
+                          "${state.invoiceInfo.invoiceSales[index].quantity}",
                           style: TextStyle(
                             fontSize: 18.0,
                             color: Theme.of(context).primaryColor
@@ -171,7 +197,7 @@ class _DetailsState extends State<Details> with SingleTickerProviderStateMixin {
                       children: <Widget>[
                         Container(
                           child: Text(
-                            index % 2 == 0 ? "Rice" : "Cereals",
+                            "${state.invoiceInfo.invoiceSales[index].name}",
                             style: TextStyle(
                               fontSize: 15.0
                             ),
@@ -180,7 +206,7 @@ class _DetailsState extends State<Details> with SingleTickerProviderStateMixin {
                         Container(
                           margin: EdgeInsets.only(top: 6.0),
                           child: Text(
-                            "Base Price: \u20B940",
+                            "Base Price: \u20b9${state.invoiceInfo.invoiceSales[index].price.toStringAsFixed(2)}",
                             style: TextStyle(
                               color: Color(0XFF404864),
                               fontSize: 13.0
@@ -191,7 +217,7 @@ class _DetailsState extends State<Details> with SingleTickerProviderStateMixin {
                     ),
                     trailing: Container(
                       child: Text(
-                        index % 2 == 0 ? "\u20b91,232.4": "\u20b9965.0",
+                        "\u20b9${state.invoiceInfo.invoiceSales[index].amount.toStringAsFixed(2)}",
                         style: TextStyle(
                           color: Color(0XFF131B26),
                           fontWeight: FontWeight.w500,
@@ -201,6 +227,86 @@ class _DetailsState extends State<Details> with SingleTickerProviderStateMixin {
                     ),
                   )
                 );
+              },
+            );
+                } else {
+                  return ListView.builder(
+                  itemCount: 5,
+                  itemBuilder: (context, index){
+                    return Container(
+                      padding: EdgeInsets.symmetric(vertical: 12.0),
+                      child: ListTile(
+                        leading: Shimmer.fromColors(
+                              baseColor: Colors.grey[200],
+                              highlightColor: Colors.grey[100],
+                              child: Container(
+                              width: 48.0,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.white,
+                                border: Border.all(
+                                  color: Colors.grey.withOpacity(0.5),
+                                  width: 0.5
+                                )
+                              )
+                            ),
+                        ),
+                        title: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Container(
+                              child: Shimmer.fromColors(
+                                baseColor: Colors.grey[200],
+                                highlightColor: Colors.grey[100],
+                                child: Container(
+                                  width: double.infinity,
+                                  height: 16.0,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(12.0),
+                                      color: Colors.white
+                                    ),
+                                )
+                              )
+                            ),
+                            Container(
+                              margin: EdgeInsets.only(top: 12.0),
+                              child: Container(
+                              child: Shimmer.fromColors(
+                                  baseColor: Colors.grey[200],
+                                  highlightColor: Colors.grey[100],
+                                  child: Container(
+                                    width: double.infinity,
+                                    height: 13.0,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(12.0),
+                                      color: Colors.white
+                                    ),
+                                  )
+                                )
+                              ),
+                            )
+                          ],
+                        ),
+                        trailing: Container(
+                          child: Shimmer.fromColors(
+                              baseColor: Colors.grey[200],
+                              highlightColor: Colors.grey[100],
+                              child: Container(
+                                height: 24,
+                                width: 24,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Colors.white
+                                    ),
+                              )
+                            )
+                        ),
+                      )
+                    );
+                  },
+                );
+                }
               },
             )
           ],

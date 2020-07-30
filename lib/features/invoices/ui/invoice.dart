@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:intl/intl.dart';
+import 'package:salesman/features/details/bloc/details_bloc.dart';
+import 'package:salesman/features/details/data/repository/details_repository.dart';
 import 'package:salesman/features/details/ui/details.dart';
 import 'package:salesman/features/invoices/bloc/invoice_bloc.dart';
 import 'package:salesman/features/invoices/bloc/invoice_events.dart';
@@ -14,6 +16,9 @@ class Invoice extends StatefulWidget {
 }
 
 class _InvoiceState extends State<Invoice> {
+
+  InvoiceInfoRepository invoiceInfoRepository = new InvoiceInfoRepository();
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -37,7 +42,6 @@ class _InvoiceState extends State<Invoice> {
         body: Container(
           child: BlocBuilder<InvoiceBloc, InvoiceState>(
             builder: (context, state){
-              print(state);
               if(state is InvoiceInitialState){
                   context.bloc<InvoiceBloc>().add(LoadInvoicesEvent());
               }
@@ -49,7 +53,12 @@ class _InvoiceState extends State<Invoice> {
                           padding: EdgeInsets.symmetric(vertical: 12.0),
                           child: ListTile(
                             onTap: (){
-                              Navigator.of(context).push(MaterialPageRoute(builder: (context) => Details()));
+                              Navigator.of(context).push(MaterialPageRoute(builder: (context) => BlocProvider(
+                                create: (context) => InvoiceDetailsBloc(invoiceInfoRepository: invoiceInfoRepository),
+                                child: Details(
+                                  invoiceID: state.invoices[index].uid,
+                                ),
+                              ) ));
                             },
                             leading: Container(
                               width: 48.0,
@@ -95,7 +104,7 @@ class _InvoiceState extends State<Invoice> {
                             ),
                             trailing: Container(
                               child: Text(
-                                "\u20b9 ${state.invoices[index].amount.toStringAsPrecision(2)}",
+                                "\u20b9 ${state.invoices[index].amount.toStringAsFixed(2)}",
                                 style: TextStyle(
                                   color: Color(0XFF131B26),
                                   fontWeight: FontWeight.w500,
