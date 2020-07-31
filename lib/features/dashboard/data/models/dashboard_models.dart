@@ -24,11 +24,13 @@ class RecentTransactions extends Equatable {
   final int id;
   final double amount;
   final bool isCredit;
+  final String image;
   final String createdAt;
 
   RecentTransactions({
     @required this.id,
     @required this.amount,
+    @required this.image,
     @required this.isCredit,
     @required this.createdAt
   });
@@ -41,6 +43,7 @@ class RecentTransactions extends Equatable {
       id: json["id"],
       amount: json["amount"],
       isCredit: json["is_credit"],
+      image: json["image"],
       createdAt: json["created_at"]
     );
   }

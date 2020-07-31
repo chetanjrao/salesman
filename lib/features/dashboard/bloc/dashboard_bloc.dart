@@ -15,8 +15,8 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     if(event is FetchDashboardStatistics){
       yield DashboardLoading();
       try {
-        final DashboardStatistics _statistics = await dashboardRepository.getStatisticsData();
-        final List<RecentTransactions> _transactions = await dashboardRepository.getRecentTransactions();
+        final DashboardStatistics _statistics = await dashboardRepository.getStatisticsData(event.distributor);
+        final List<RecentTransactions> _transactions = await dashboardRepository.getRecentTransactions(event.distributor);
         yield DashboardSuccess(
           statistics: _statistics,
           transactions: _transactions

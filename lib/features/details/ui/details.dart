@@ -4,6 +4,7 @@ import 'package:flutter_icons/flutter_icons.dart';
 import 'package:salesman/features/details/bloc/details_bloc.dart';
 import 'package:salesman/features/details/bloc/details_event.dart';
 import 'package:salesman/features/details/bloc/details_state.dart';
+import 'package:salesman/features/editinvoice/ui/edit_invoice.dart';
 import 'package:shimmer/shimmer.dart';
 
 class Details extends StatefulWidget {
@@ -128,10 +129,15 @@ class _DetailsState extends State<Details> with SingleTickerProviderStateMixin {
                             )
                           ),
                           child: Center(
-                            child: Icon(
-                              Feather.plus,
-                              color: Colors.white,
-                              size: 20.0
+                            child: GestureDetector(
+                              child: Icon(
+                                Feather.plus,
+                                color: Colors.white,
+                                size: 20.0
+                              ),
+                              onTap: (){
+                                Navigator.of(context).push(MaterialPageRoute(builder: (context) => EditInvoice() ));
+                              },
                             )
                           )
                         ),

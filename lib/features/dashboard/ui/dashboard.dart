@@ -7,6 +7,7 @@ import 'package:salesman/features/dashboard/bloc/dashboard_events.dart';
 import 'package:salesman/features/dashboard/bloc/dashboard_state.dart';
 import 'package:salesman/features/dashboard/data/models/dashboard_models.dart';
 import 'package:salesman/features/inventory/ui/inventory.dart';
+import 'package:salesman/utils/globals.dart';
 import 'package:shimmer/shimmer.dart';
 
 class Dashboard extends StatefulWidget {
@@ -67,8 +68,12 @@ class _DashboardState extends State<Dashboard> with SingleTickerProviderStateMix
               child: BlocBuilder<DashboardBloc, DashboardState>(
                 builder: (blocContext, state){
                   if(state is DashboardInitial){
-                    context.bloc<DashboardBloc>().add(FetchDashboardStatistics());
-                    context.bloc<DashboardBloc>().add(FetchRecentTransactions());
+                    context.bloc<DashboardBloc>().add(FetchDashboardStatistics(
+                      distributor: 1
+                    ));
+                    context.bloc<DashboardBloc>().add(FetchRecentTransactions(
+                      distributor: 1
+                    ));
                   }
                   if(state is DashboardSuccess){
 
@@ -89,7 +94,7 @@ class _DashboardState extends State<Dashboard> with SingleTickerProviderStateMix
                             )
                           ),
                           TextSpan(
-                            text: "${state.statistics.total}",
+                            text: "${state.statistics.total.toStringAsFixed(2)}",
                             style: TextStyle(
                               fontSize: 32.0,
                               color: Colors.black,
@@ -107,7 +112,7 @@ class _DashboardState extends State<Dashboard> with SingleTickerProviderStateMix
                       children: <Widget>[
                         Container(
                           child: Text(
-                            state.statistics.status < 0 ? "${state.statistics.status} %" : "+ ${state.statistics.status} %",
+                            state.statistics.status < 0 ? "${state.statistics.status.toStringAsFixed(2)} %" : "+ ${state.statistics.status.toStringAsFixed(2)} %",
                             style: TextStyle(
                               color: state.statistics.status < 0 ? Colors.red : Color(0XFF0EA581)
                             ),
@@ -156,21 +161,21 @@ class _DashboardState extends State<Dashboard> with SingleTickerProviderStateMix
                     return Container(
                       padding: EdgeInsets.symmetric(vertical: 12.0),
                       child: ListTile(
-                        leading: Container(
-                          width: 48.0,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: Colors.grey.withOpacity(0.5),
-                              width: 0.5
-                            )
-                          ),
-                          child: Center(
-                            child: Icon(
-                              allTransactions[index].isCredit ? Feather.plus : Feather.arrow_right,
-                              color: Theme.of(context).primaryColor,
-                            )
-                          )
+                        leading:Container(
+                              width: 48.0,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                image: DecorationImage(
+                                  image: NetworkImage(
+                                    "$API_URL${allTransactions[index].image}"
+                                  ),
+                                  
+                                ),
+                                border: Border.all(
+                                  color: Colors.grey.withOpacity(0.5),
+                                  width: 0.5
+                                )
+                              ) 
                         ),
                         title: Column(
                           mainAxisSize: MainAxisSize.min,
@@ -217,20 +222,20 @@ class _DashboardState extends State<Dashboard> with SingleTickerProviderStateMix
                       padding: EdgeInsets.symmetric(vertical: 12.0),
                       child: ListTile(
                         leading: Container(
-                          width: 48.0,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: Colors.grey.withOpacity(0.5),
-                              width: 0.5
-                            )
-                          ),
-                          child: Center(
-                            child: Icon(
-                              creditTransactions[index].isCredit ? Feather.plus : Feather.arrow_right,
-                              color: Theme.of(context).primaryColor,
-                            )
-                          )
+                              width: 48.0,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                image: DecorationImage(
+                                  image: NetworkImage(
+                                    "$API_URL${allTransactions[index].image}"
+                                  ),
+                                  
+                                ),
+                                border: Border.all(
+                                  color: Colors.grey.withOpacity(0.5),
+                                  width: 0.5
+                                )
+                              ) 
                         ),
                         title: Column(
                           mainAxisSize: MainAxisSize.min,
@@ -277,20 +282,20 @@ class _DashboardState extends State<Dashboard> with SingleTickerProviderStateMix
                       padding: EdgeInsets.symmetric(vertical: 12.0),
                       child: ListTile(
                         leading: Container(
-                          width: 48.0,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: Colors.grey.withOpacity(0.5),
-                              width: 0.5
-                            )
-                          ),
-                          child: Center(
-                            child: Icon(
-                              debitTransactions[index].isCredit ? Feather.plus : Feather.arrow_right,
-                              color: Theme.of(context).primaryColor,
-                            )
-                          )
+                              width: 48.0,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                image: DecorationImage(
+                                  image: NetworkImage(
+                                    "$API_URL${allTransactions[index].image}"
+                                  ),
+                                  
+                                ),
+                                border: Border.all(
+                                  color: Colors.grey.withOpacity(0.5),
+                                  width: 0.5
+                                )
+                              ) 
                         ),
                         title: Column(
                           mainAxisSize: MainAxisSize.min,
