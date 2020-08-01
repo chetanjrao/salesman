@@ -14,7 +14,7 @@ class DashboardStatistics extends Equatable {
   static DashboardStatistics fromJson(dynamic json){
     return DashboardStatistics(
       status: json["status"],
-      total: json["total"]
+      total: double.parse("${json["total"]}")
     );
   }
 

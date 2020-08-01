@@ -20,7 +20,7 @@ import 'features/invoices/bloc/invoice_bloc.dart';
 void main() {
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
     statusBarIconBrightness: Brightness.dark,
-    statusBarColor: Colors.white.withOpacity(0.9)
+    statusBarColor: Colors.white.withOpacity(1)
   ));
   runApp(HomeScreen());
 }
@@ -32,7 +32,7 @@ class HomeScreen extends StatelessWidget {
     return MaterialApp(
       theme: ThemeData(
         fontFamily: 'Euclid Circular B',
-        primaryColor: Color(0xFF1B279C)
+        primaryColor: Color(0xFF1e7145)
       ),
       initialRoute: "/home",
       routes: {

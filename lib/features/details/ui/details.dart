@@ -5,7 +5,9 @@ import 'package:salesman/features/details/bloc/details_bloc.dart';
 import 'package:salesman/features/details/bloc/details_event.dart';
 import 'package:salesman/features/details/bloc/details_state.dart';
 import 'package:salesman/features/editinvoice/ui/edit_invoice.dart';
+import 'package:salesman/utils/globals.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class Details extends StatefulWidget {
 
@@ -26,6 +28,18 @@ class _DetailsState extends State<Details> with SingleTickerProviderStateMixin {
     super.initState();
     tabController = new TabController(length: 1, vsync: this);
   }
+  
+  launchURL(String url) async {
+    if (await canLaunch(url)) {
+      await launch(url, 
+      enableDomStorage: true,
+      forceSafariVC: true,
+      enableJavaScript: true,
+      forceWebView: false);
+    } else {
+      throw 'Could not launch $url';
+    }
+ }
 
   @override
   Widget build(BuildContext context) {
@@ -98,25 +112,31 @@ class _DetailsState extends State<Details> with SingleTickerProviderStateMixin {
                     margin: EdgeInsets.symmetric(vertical: 16.0),
                     child: Wrap(
                       children: <Widget>[
-                        Container(
-                          padding: EdgeInsets.all(10.0),
-                          width: 48.0,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: Colors.grey.withOpacity(0.5),
-                              width: 0.5
+                        GestureDetector(
+                          onTap: (){
+                            launchURL("$API_URL/salesman/sales/invoice/${state.invoiceInfo.invoiceInfo.uid}");
+                          },
+                          child: Container(
+                            padding: EdgeInsets.all(10.0),
+                            width: 48.0,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: Colors.grey.withOpacity(0.5),
+                                width: 0.5
+                              )
+                            ),
+                            child: Center(
+                              child: Icon(
+                                Feather.download_cloud,
+                                color: Theme.of(context).primaryColor,
+                                size: 20.0
+                              )
                             )
                           ),
-                          child: Center(
-                            child: Icon(
-                              Feather.download_cloud,
-                              color: Theme.of(context).primaryColor,
-                              size: 20.0
-                            )
-                          )
                         ),
-                        Container(
+                        GestureDetector(
+                          child: Container(
                           padding: EdgeInsets.all(10.0),
                           margin: EdgeInsets.only(left: 12.0),
                           width: 48.0,
@@ -129,17 +149,16 @@ class _DetailsState extends State<Details> with SingleTickerProviderStateMixin {
                             )
                           ),
                           child: Center(
-                            child: GestureDetector(
-                              child: Icon(
+                            child: Icon(
                                 Feather.plus,
                                 color: Colors.white,
                                 size: 20.0
-                              ),
-                              onTap: (){
-                                Navigator.of(context).push(MaterialPageRoute(builder: (context) => EditInvoice() ));
-                              },
                             )
                           )
+                        ),
+                          onTap: (){
+                            Navigator.of(context).push(MaterialPageRoute(builder: (context) => EditInvoice() ));
+                          },
                         ),
                       ],
                     )

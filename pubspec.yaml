@@ -49,6 +49,12 @@ dependencies:
 
   shimmer: ^1.1.1
 
+  datetime_picker_formfield: ^1.0.0
+
+  url_launcher: ^5.5.0
+
+  circular_check_box: "<=1.0.1"
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -203,7 +203,7 @@ class _DashboardState extends State<Dashboard> with SingleTickerProviderStateMix
                         ),
                         trailing: Container(
                           child: Text(
-                            allTransactions[index].isCredit ? "+\u20b9${state.transactions[index].amount}": "\u20b9${state.transactions[index].amount}",
+                            allTransactions[index].isCredit ? "+\u20b9${state.transactions[index].amount.toStringAsFixed(2)}": "\u20b9${state.transactions[index].amount.toStringAsFixed(2)}",
                             style: TextStyle(
                               color: allTransactions[index].isCredit ? Color(0XFF0EA581) : Color(0XFF131B26),
                               fontWeight: FontWeight.w500,
@@ -263,7 +263,7 @@ class _DashboardState extends State<Dashboard> with SingleTickerProviderStateMix
                         ),
                         trailing: Container(
                           child: Text(
-                            creditTransactions[index].isCredit ? "+\u20b9${creditTransactions[index].amount}": "\u20b9${creditTransactions[index].amount}",
+                            creditTransactions[index].isCredit ? "+\u20b9${creditTransactions[index].amount.toStringAsFixed(2) }": "\u20b9${creditTransactions[index].amount.toStringAsFixed(2)}",
                             style: TextStyle(
                               color: creditTransactions[index].isCredit ? Color(0XFF0EA581) : Color(0XFF131B26),
                               fontWeight: FontWeight.w500,
@@ -323,7 +323,7 @@ class _DashboardState extends State<Dashboard> with SingleTickerProviderStateMix
                         ),
                         trailing: Container(
                           child: Text(
-                            debitTransactions[index].isCredit ? "+\u20b9${state.transactions[index].amount}": "\u20b9${state.transactions[index].amount}",
+                            debitTransactions[index].isCredit ? "+\u20b9${state.transactions[index].amount.toStringAsFixed(2)}": "\u20b9${state.transactions[index].amount.toStringAsFixed(2)}",
                             style: TextStyle(
                               color: debitTransactions[index].isCredit ? Color(0XFF0EA581) : Color(0XFF131B26),
                               fontWeight: FontWeight.w500,
