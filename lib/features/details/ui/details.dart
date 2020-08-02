@@ -4,6 +4,8 @@ import 'package:flutter_icons/flutter_icons.dart';
 import 'package:salesman/features/details/bloc/details_bloc.dart';
 import 'package:salesman/features/details/bloc/details_event.dart';
 import 'package:salesman/features/details/bloc/details_state.dart';
+import 'package:salesman/features/editinvoice/bloc/editinvoice_bloc.dart';
+import 'package:salesman/features/editinvoice/data/repository/edit_invoice_repository.dart';
 import 'package:salesman/features/editinvoice/ui/edit_invoice.dart';
 import 'package:salesman/utils/globals.dart';
 import 'package:shimmer/shimmer.dart';
@@ -20,7 +22,7 @@ class Details extends StatefulWidget {
 }
 
 class _DetailsState extends State<Details> with SingleTickerProviderStateMixin {
-
+  EditInvoiceRepository editInvoiceRepository = new EditInvoiceRepository();
   TabController tabController;
 
   @override
@@ -157,7 +159,14 @@ class _DetailsState extends State<Details> with SingleTickerProviderStateMixin {
                           )
                         ),
                           onTap: (){
-                            Navigator.of(context).push(MaterialPageRoute(builder: (context) => EditInvoice() ));
+                            Navigator.of(context).push(MaterialPageRoute(builder: (context) => BlocProvider(
+                              create: (context) => EditInvoiceBloc(
+                                  editInvoiceRepository: editInvoiceRepository
+                              ),
+                              child: EditInvoice(
+                                invoice: widget.invoiceID,
+                              ),
+                            ) ));
                           },
                         ),
                       ],

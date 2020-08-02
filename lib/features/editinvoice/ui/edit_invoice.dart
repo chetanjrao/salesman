@@ -1,18 +1,36 @@
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:intl/intl.dart';
+import 'package:salesman/features/editinvoice/bloc/editinvoice_bloc.dart';
+import 'package:salesman/features/editinvoice/bloc/editinvoice_event.dart';
+import 'package:salesman/features/editinvoice/bloc/editinvoice_state.dart';
+import 'package:salesman/features/editinvoice/data/models/edit_invoice_models.dart';
+import 'package:salesman/features/editinvoice/data/repository/edit_invoice_repository.dart';
+import 'package:salesman/features/editinvoice/ui/success_page.dart';
 import 'package:salesman/utils/globals.dart';
 import 'package:circular_check_box/circular_check_box.dart';
+import 'package:shimmer/shimmer.dart';
 
 class EditInvoice extends StatefulWidget {
+
+  final String invoice;
+
+  const EditInvoice({Key key,@required this.invoice}) : super(key: key);
+
   @override
   _EditInvoiceState createState() => _EditInvoiceState();
 }
 
 class _EditInvoiceState extends State<EditInvoice> {
-
+  EditInvoiceRepository editInvoiceRepository = new EditInvoiceRepository();
   int currentState = 0;
+  int choosenIndex = 0;
+  int choosenMethod = 0;
+  double amount = 0.0;
+  String deadline;
+  ScrollController _controller = new ScrollController();
 
   @override
   Widget build(BuildContext context) {
@@ -28,11 +46,35 @@ class _EditInvoiceState extends State<EditInvoice> {
             ),
             onPressed: () => Navigator.of(context).pop(),
           ),
+          title: Flex(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                direction: Axis.horizontal,
+                children: <Widget>[
+                  Container(
+                    child: Text(
+                      "Add Credit",
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.w500
+                      ),
+                    ),
+                  )
+                ],
+              ),
           titleSpacing: 0,
           backgroundColor: Colors.white
         ),
-      body: Stepper(
-            physics: ScrollPhysics(),
+      body: SingleChildScrollView(
+        controller: _controller,
+        child: BlocBuilder<EditInvoiceBloc, EditInvoiceState>(
+        builder: (context, state){
+          if(state is EditInvoiceInitialState){
+            context.bloc<EditInvoiceBloc>().add(LoadPaymentmethods(distributor: 1));
+          }
+          if(state is EditInvoiceSuccessState){
+            return Stepper(
+            physics: ClampingScrollPhysics(),
             type: StepperType.vertical,
             currentStep: currentState,
             onStepContinue: (){
@@ -41,7 +83,42 @@ class _EditInvoiceState extends State<EditInvoice> {
                   currentState += 1;
                 });
               } else {
-                print("compleye");
+                if(amount <= 0){
+                  Scaffold.of(context).showSnackBar(SnackBar(
+                    behavior: SnackBarBehavior.floating,
+                    content: Text(
+                      "Amount cannot be zero",
+                      style: TextStyle(
+                        fontFamily: "Euclid Circular B",
+                        fontWeight: FontWeight.w500
+                      ),
+                    ),
+                  ));
+                } else if(deadline == null){
+                  Scaffold.of(context).showSnackBar(SnackBar(
+                    behavior: SnackBarBehavior.floating,
+                    content: Text(
+                      "Deadline cannot be empty",
+                      style: TextStyle(
+                        fontFamily: "Euclid Circular B",
+                        fontWeight: FontWeight.w500
+                      ),
+                    ),
+                  ));
+                } else {
+                  EditInvoiceModel data = EditInvoiceModel(
+                    invoice: widget.invoice, 
+                    amount: amount, 
+                    deadline: deadline, 
+                    paymentMode: state.methods[choosenIndex].id
+                  );
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => BlocProvider(
+                      create: (context) => EditInvoiceBloc(editInvoiceRepository: editInvoiceRepository),
+                      child: SuccessPage(
+                        model: data,
+                      )
+                    ) ));
+                }
               }
             },
             onStepTapped: (step){
@@ -54,17 +131,39 @@ class _EditInvoiceState extends State<EditInvoice> {
                 alignment: Alignment.centerLeft,
                 margin: EdgeInsets.symmetric(vertical: 16.0),
                 child: FlatButton(
+                  disabledColor: Theme.of(context).primaryColor.withOpacity(0.9),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(6.0)
                   ),
                   color: Theme.of(context).primaryColor,
-                  onPressed: onStepContinue, 
-                  child: Text(
-                    "Next",
+                  //state is EditInvoiceUploadLoadingState ? null : onStepContinue
+                  onPressed: onStepContinue,
+                  child: state is EditInvoiceUploadLoadingState ? Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Text(
+                        "Creating transaction",
+                        style: TextStyle(
+                          color: Colors.white
+                        ),
+                      ),
+                      Container(
+                        margin: EdgeInsets.only(left: 12.0),
+                        height: 18.0,
+                        width: 18.0,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          backgroundColor: Colors.transparent,
+                          valueColor: AlwaysStoppedAnimation(Colors.white)
+                        )
+                      )
+                    ],
+                  ) : Text(
+                    currentState < 2 ? "Next" : "Submit",
                     style: TextStyle(
                       color: Colors.white
                     ),
-                  )
+                  ),
                 )
               );
             },
@@ -77,14 +176,19 @@ class _EditInvoiceState extends State<EditInvoice> {
                 setState(() {
                   currentState = 0;
                 });
-                print("compleye");
               }
             },
             steps: [
               Step(
+                
                 title: Text("Enter Amount"),
                 content: Container(
                   child: TextField(
+                    onChanged: (val){
+                      setState((){
+                        amount = double.parse(val);
+                      });
+                    },
                     textAlign: TextAlign.left,
                     style: TextStyle(
                       fontSize: 21.0,
@@ -125,7 +229,18 @@ class _EditInvoiceState extends State<EditInvoice> {
               Step(
                 title: Text("Choose Deadline"), 
                 content: Container(
+
                   child: DateTimeField(
+                    onChanged: (val){
+                      setState((){
+                        final DateFormat formatter = DateFormat('yyyy-MM-dd');
+                        final String formatted = formatter.format(val);
+                        deadline = formatted;
+                      });
+                    },
+                    style: TextStyle(
+                      fontWeight: FontWeight.w500
+                    ),
                   textAlign: TextAlign.left,
                     keyboardType: TextInputType.datetime,
                     decoration: InputDecoration(
@@ -163,54 +278,59 @@ class _EditInvoiceState extends State<EditInvoice> {
                 state: currentState > 1 ? StepState.complete : StepState.indexed),
               Step(
                 title: Text("Choose Payment Method"), 
-                content: Column(
-        
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-             ListTile(
-                leading: CircularCheckBox(
-                  value: true,
-                  tristate: true,
-                  activeColor: Theme.of(context).primaryColor, 
-                  disabledColor: Colors.grey, 
-                  onChanged: (val) => this.setState(() { }) 
-                ),
-                trailing: Container(
-                    child: Image.network(
-                    "$API_URL/uploads/uploads/providers/phonepe.png",
-                    fit: BoxFit.cover,
-                    height: 36.0,
-                  ),
-                ),
-                contentPadding: EdgeInsets.zero,
-                subtitle: Text("9110466718@paytm"),
-                title: Text("Phone Pe"),
-                onTap: ()=> this.setState(() { }),
-              ),
-              Container(
+                content: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: state.methods.length,
+                  controller: _controller,
+              itemBuilder: (context, index){
+                
+                return Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12.0)
                 ),
                 child: ListTile(
+                
                 leading: CircularCheckBox(
-                  value: false,
+                  value: choosenIndex == index,
                   tristate: true,
                   activeColor: Theme.of(context).primaryColor, 
                   disabledColor: Colors.grey, 
-                  onChanged: (val) => this.setState(() { }) 
+                  onChanged: (val) => this.setState(() {}) 
                 ),
                 trailing: Container(
                     child: Image.network(
-                    "$API_URL/uploads/uploads/providers/gpay.jpg",
-                    fit: BoxFit.cover,
+                    "$API_URL${state.methods[index].image}",
+                    fit: BoxFit.contain,
                     height: 36.0,
                   ),
                 ),
                 contentPadding: EdgeInsets.zero,
                 subtitle: Container(
                   margin: EdgeInsets.only(top: 6.0),
-                  child: Text(
-                    "9110466718@paytm",
+                  child: state.methods[index].isBank ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Container(
+                        margin: EdgeInsets.only(top: 0),
+                        child: Text(
+                          "${state.methods[index].accountId}",
+                    style: TextStyle(
+                      fontSize: 13.0
+                    ),
+                        )
+                      ),
+                    //   Container(
+                    //     margin: EdgeInsets.only(top: 4),
+                    //     child: Text(
+                    //       "IFSC: ${state.methods[index].ifsc}",
+                    // style: TextStyle(
+                    //   fontSize: 13.0
+                    // ),
+                    //     )
+                    //   )
+                    ],
+                  ) : Text(
+                    "${state.methods[index].accountId}",
                     style: TextStyle(
                       fontSize: 13.0
                     ),
@@ -218,23 +338,107 @@ class _EditInvoiceState extends State<EditInvoice> {
                 ),
                 title: Container(
                   child: Text(
-                    "Google Pay",
+                    "${state.methods[index].name}",
                     style: TextStyle(
                       fontWeight: FontWeight.w500,
                       fontSize: 15.0
                     ),
                   )
                 ),
-                onTap: ()=> this.setState(() { }),
+                onTap: ()=> this.setState(() { 
+                    choosenIndex = index;
+                    }),
               ),
-              )
-            
-          ],
-        ),
+              );
+              }
+            ),
+              
                 isActive: currentState != 2,
                 state: currentState > 2 ? StepState.complete : StepState.indexed),
             ],
-          ),
+          );
+          } else {
+            return ListView.builder(
+              shrinkWrap: true,
+                  itemCount: 5,
+                  itemBuilder: (context, index){
+                    return Container(
+                      padding: EdgeInsets.symmetric(vertical: 12.0),
+                      child: ListTile(
+                        leading: Shimmer.fromColors(
+                              baseColor: Colors.grey[200],
+                              highlightColor: Colors.grey[100],
+                              child: Container(
+                              width: 48.0,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.white,
+                                border: Border.all(
+                                  color: Colors.grey.withOpacity(0.5),
+                                  width: 0.5
+                                )
+                              )
+                            ),
+                        ),
+                        title: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Container(
+                              child: Shimmer.fromColors(
+                                baseColor: Colors.grey[200],
+                                highlightColor: Colors.grey[100],
+                                child: Container(
+                                  width: double.infinity,
+                                  height: 16.0,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(12.0),
+                                      color: Colors.white
+                                    ),
+                                )
+                              )
+                            ),
+                            Container(
+                              margin: EdgeInsets.only(top: 12.0),
+                              child: Container(
+                              child: Shimmer.fromColors(
+                                  baseColor: Colors.grey[200],
+                                  highlightColor: Colors.grey[100],
+                                  child: Container(
+                                    width: double.infinity,
+                                    height: 13.0,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(12.0),
+                                      color: Colors.white
+                                    ),
+                                  )
+                                )
+                              ),
+                            )
+                          ],
+                        ),
+                        trailing: Container(
+                          child: Shimmer.fromColors(
+                              baseColor: Colors.grey[200],
+                              highlightColor: Colors.grey[100],
+                              child: Container(
+                                height: 24,
+                                width: 24,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Colors.white
+                                    ),
+                              )
+                            )
+                        ),
+                      )
+                    );
+                  },
+                );
+          }
+        }
+      )
+      )
       )
     );
   }

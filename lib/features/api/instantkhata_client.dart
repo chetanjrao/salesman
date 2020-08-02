@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:salesman/features/editinvoice/data/models/edit_invoice_models.dart';
 import 'package:salesman/utils/globals.dart';
 
 class InstantKhataClient {
@@ -67,6 +68,35 @@ class InstantKhataClient {
         HttpHeaders.contentTypeHeader: "application/json"
       }
     );
+  }
+
+  Future<http.Response> getPaymentMethods(int distributor) async {
+      return http.post(
+        "$CONTEXT_API_URL/payments/",
+        headers: {
+          HttpHeaders.authorizationHeader: "Bearer $_accessToken",
+          HttpHeaders.contentTypeHeader: "application/json"
+        },
+        body: jsonEncode({
+          "distributor": distributor
+        })
+      );
+  }
+
+  Future<http.Response> updateInvoice(EditInvoiceModel invoice) {
+    return http.post(
+        "$CONTEXT_API_URL/sales/invoice/edit/",
+        headers: {
+          HttpHeaders.authorizationHeader: "Bearer $_accessToken",
+          HttpHeaders.contentTypeHeader: "application/json"
+        },
+        body: jsonEncode({
+          "invoice": invoice.invoice,
+          "amount": invoice.amount,
+          "deadline": invoice.deadline,
+          "payment_mode": invoice.paymentMode
+        })
+      );
   }
 
 }
