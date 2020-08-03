@@ -6,6 +6,13 @@ abstract class EditInvoiceEvent extends Equatable {
   const EditInvoiceEvent();
 }
 
+class LoadInitialEvent extends EditInvoiceEvent {
+  const LoadInitialEvent();
+  
+  @override
+  List<Object> get props => [];
+}
+
 class LoadPaymentmethods extends EditInvoiceEvent{
   final int distributor;
 

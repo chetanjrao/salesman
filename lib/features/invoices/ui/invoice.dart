@@ -5,6 +5,8 @@ import 'package:intl/intl.dart';
 import 'package:salesman/features/details/bloc/details_bloc.dart';
 import 'package:salesman/features/details/data/repository/details_repository.dart';
 import 'package:salesman/features/details/ui/details.dart';
+import 'package:salesman/features/editinvoice/bloc/editinvoice_bloc.dart';
+import 'package:salesman/features/editinvoice/data/repository/edit_invoice_repository.dart';
 import 'package:salesman/features/invoices/bloc/invoice_bloc.dart';
 import 'package:salesman/features/invoices/bloc/invoice_events.dart';
 import 'package:salesman/features/invoices/bloc/invoice_state.dart';
@@ -18,6 +20,7 @@ class Invoice extends StatefulWidget {
 class _InvoiceState extends State<Invoice> {
 
   InvoiceInfoRepository invoiceInfoRepository = new InvoiceInfoRepository();
+  EditInvoiceRepository editInvoiceRepository = new EditInvoiceRepository();
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +43,9 @@ class _InvoiceState extends State<Invoice> {
           ),
         ),
         body: Container(
-          child: BlocBuilder<InvoiceBloc, InvoiceState>(
+          child: BlocConsumer(
+            bloc: BlocProvider.of<InvoiceBloc>(context),
+            listener: (context, InvoiceState state){},
             builder: (context, state){
               if(state is InvoiceInitialState){
                   context.bloc<InvoiceBloc>().add(LoadInvoicesEvent());
@@ -53,12 +58,21 @@ class _InvoiceState extends State<Invoice> {
                           padding: EdgeInsets.symmetric(vertical: 12.0),
                           child: ListTile(
                             onTap: (){
-                              Navigator.of(context).push(MaterialPageRoute(builder: (context) => BlocProvider(
-                                create: (context) => InvoiceDetailsBloc(invoiceInfoRepository: invoiceInfoRepository),
-                                child: Details(
+                              Navigator.of(context).push(MaterialPageRoute(
+                                builder: (_) => MultiBlocProvider(
+                                    providers: [
+                                      BlocProvider.value(
+                                        value: context.bloc<InvoiceDetailsBloc>()
+                                      ),
+                                      BlocProvider.value(
+                                        value: context.bloc<EditInvoiceBloc>()
+                                      ),
+                                    ], 
+                                    child: Details(
                                   invoiceID: state.invoices[index].uid,
                                 ),
-                              ) ));
+                                  ),            
+                              ));
                             },
                             leading: Container(
                               width: 48.0,

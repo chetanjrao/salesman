@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:intl/intl.dart';
+import 'package:salesman/features/details/bloc/details_bloc.dart';
+import 'package:salesman/features/details/bloc/details_event.dart';
+import 'package:salesman/features/details/data/repository/details_repository.dart';
 import 'package:salesman/features/editinvoice/bloc/editinvoice_bloc.dart';
 import 'package:salesman/features/editinvoice/bloc/editinvoice_event.dart';
 import 'package:salesman/features/editinvoice/bloc/editinvoice_state.dart';
@@ -16,18 +19,21 @@ import 'package:shimmer/shimmer.dart';
 class EditInvoice extends StatefulWidget {
 
   final String invoice;
+  final double balance;
 
-  const EditInvoice({Key key,@required this.invoice}) : super(key: key);
+  const EditInvoice({Key key,@required this.invoice,@required this.balance}) : super(key: key);
 
   @override
   _EditInvoiceState createState() => _EditInvoiceState();
 }
 
 class _EditInvoiceState extends State<EditInvoice> {
+  InvoiceInfoRepository invoiceInfoRepository = new InvoiceInfoRepository();
   EditInvoiceRepository editInvoiceRepository = new EditInvoiceRepository();
   int currentState = 0;
   int choosenIndex = 0;
   int choosenMethod = 0;
+  
   double amount = 0.0;
   String deadline;
   ScrollController _controller = new ScrollController();
@@ -94,6 +100,17 @@ class _EditInvoiceState extends State<EditInvoice> {
                       ),
                     ),
                   ));
+                } else if(amount > widget.balance.ceil()){
+                  Scaffold.of(context).showSnackBar(SnackBar(
+                    behavior: SnackBarBehavior.floating,
+                    content: Text(
+                      "Amount should be less than or equal to \u20b9${widget.balance.ceil()}",
+                      style: TextStyle(
+                        fontFamily: "Euclid Circular B",
+                        fontWeight: FontWeight.w500
+                      ),
+                    ),
+                  ));
                 } else if(deadline == null){
                   Scaffold.of(context).showSnackBar(SnackBar(
                     behavior: SnackBarBehavior.floating,
@@ -112,12 +129,20 @@ class _EditInvoiceState extends State<EditInvoice> {
                     deadline: deadline, 
                     paymentMode: state.methods[choosenIndex].id
                   );
-                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => BlocProvider(
-                      create: (context) => EditInvoiceBloc(editInvoiceRepository: editInvoiceRepository),
-                      child: SuccessPage(
+                  Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) =>  MultiBlocProvider(
+                                    providers: [
+                                      BlocProvider.value(
+                                                        value: context.bloc<InvoiceDetailsBloc>()
+                                                      ),
+                                      BlocProvider.value(
+                                                        value: context.bloc<EditInvoiceBloc>()
+                                                      ),
+                                    ],
+                    child: SuccessPage(
                         model: data,
                       )
-                    ) ));
+                  )
+                   ));
                 }
               }
             },

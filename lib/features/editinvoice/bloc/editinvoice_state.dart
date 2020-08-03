@@ -26,15 +26,16 @@ class EditInvoiceUploadLoadingState extends EditInvoiceState {
 }
 
 class EditInvoiceUploadSuccessState extends EditInvoiceState {
-
+  final String invoiceID;
   final EditInvoiceMessage message;
 
   const EditInvoiceUploadSuccessState({
-    @required this.message
+    @required this.message,
+    @required this.invoiceID
   });
 
   @override
-  List<Object> get props => [message];
+  List<Object> get props => [message, invoiceID];
 
 }
 

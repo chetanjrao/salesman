@@ -162,20 +162,22 @@ class _DashboardState extends State<Dashboard> with SingleTickerProviderStateMix
                       padding: EdgeInsets.symmetric(vertical: 12.0),
                       child: ListTile(
                         leading:Container(
-                              width: 48.0,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                image: DecorationImage(
-                                  image: NetworkImage(
-                                    "$API_URL${allTransactions[index].image}"
-                                  ),
-                                  
-                                ),
-                                border: Border.all(
-                                  color: Colors.grey.withOpacity(0.5),
-                                  width: 0.5
-                                )
-                              ) 
+                            width: 48.0,
+                          decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: Colors.grey.withOpacity(0.5),
+                                width: 0.5
+                              )
+                            ), 
+                          child: Center(
+                            child: Container(padding: EdgeInsets.all(6.0),
+                              height: 48.0,
+                             child: Image.network(
+                               "$API_URL${allTransactions[index].image}"
+                             ),
+                        )
+                          )
                         ),
                         title: Column(
                           mainAxisSize: MainAxisSize.min,

@@ -99,4 +99,17 @@ class InstantKhataClient {
       );
   }
 
+  Future<http.Response> getSalesmanInventory(int distributor) {
+    return http.post(
+      "$CONTEXT_API_URL/inventory/",
+      headers: {
+        HttpHeaders.authorizationHeader: "Bearer $_accessToken",
+        HttpHeaders.contentTypeHeader: "application/json"
+      },
+      body: jsonEncode({
+        "distributor": distributor
+      })
+    );
+  }
+
 }

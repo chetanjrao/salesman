@@ -4,9 +4,12 @@ import 'package:flutter_icons/flutter_icons.dart';
 import 'package:salesman/features/details/bloc/details_bloc.dart';
 import 'package:salesman/features/details/bloc/details_event.dart';
 import 'package:salesman/features/details/bloc/details_state.dart';
+import 'package:salesman/features/details/data/repository/details_repository.dart';
 import 'package:salesman/features/editinvoice/bloc/editinvoice_bloc.dart';
 import 'package:salesman/features/editinvoice/data/repository/edit_invoice_repository.dart';
 import 'package:salesman/features/editinvoice/ui/edit_invoice.dart';
+import 'package:salesman/features/invoices/bloc/invoice_bloc.dart';
+import 'package:salesman/features/invoices/bloc/invoice_state.dart';
 import 'package:salesman/utils/globals.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -23,12 +26,26 @@ class Details extends StatefulWidget {
 
 class _DetailsState extends State<Details> with SingleTickerProviderStateMixin {
   EditInvoiceRepository editInvoiceRepository = new EditInvoiceRepository();
+  InvoiceInfoRepository invoiceInfoRepository = new InvoiceInfoRepository();
+  InvoiceDetailsBloc detailsBloc;
   TabController tabController;
 
   @override
   void initState() {
     super.initState();
     tabController = new TabController(length: 1, vsync: this);
+  }
+
+  @override
+  void didChangeDependencies(){
+    detailsBloc = BlocProvider.of<InvoiceDetailsBloc>(context);
+    super.didChangeDependencies();
+  }
+
+  @override
+  void dispose(){
+    detailsBloc.add(LoadInfoInitial());
+    super.dispose();
   }
   
   launchURL(String url) async {
@@ -77,11 +94,16 @@ class _DetailsState extends State<Details> with SingleTickerProviderStateMixin {
                 ],
               ),
             ),
-           BlocBuilder<InvoiceDetailsBloc, InvoiceInfoState>(
+          SliverToBoxAdapter(
+            child: Container(
+              child: BlocListener(
+                bloc: detailsBloc,
+                listener: (BuildContext context, state){
+                },
+                child: BlocBuilder<InvoiceDetailsBloc, InvoiceInfoState>(
              builder: (context, state){
               if(state is InvoiceInfoSuccessState){
-               return SliverToBoxAdapter(
-              child: Column(
+               return Column(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   Container(
@@ -111,6 +133,12 @@ class _DetailsState extends State<Details> with SingleTickerProviderStateMixin {
                     )
                   ),
                   Container(
+                    margin: EdgeInsets.only(top: 3),
+                    child: Text(
+                      "Balance: \u20b9${state.invoiceInfo.invoiceInfo.balance.toStringAsFixed(2)}"
+                    )
+                  ),
+                  Container(
                     margin: EdgeInsets.symmetric(vertical: 16.0),
                     child: Wrap(
                       children: <Widget>[
@@ -137,7 +165,7 @@ class _DetailsState extends State<Details> with SingleTickerProviderStateMixin {
                             )
                           ),
                         ),
-                        GestureDetector(
+                        state.invoiceInfo.invoiceInfo.balance > 0 ? GestureDetector(
                           child: Container(
                           padding: EdgeInsets.all(10.0),
                           margin: EdgeInsets.only(left: 12.0),
@@ -159,29 +187,53 @@ class _DetailsState extends State<Details> with SingleTickerProviderStateMixin {
                           )
                         ),
                           onTap: (){
-                            Navigator.of(context).push(MaterialPageRoute(builder: (context) => BlocProvider(
-                              create: (context) => EditInvoiceBloc(
-                                  editInvoiceRepository: editInvoiceRepository
-                              ),
-                              child: EditInvoice(
+                            Navigator.of(context).push(MaterialPageRoute(builder: (_) =>  MultiBlocProvider(
+                                    providers: [
+                                      BlocProvider.value(
+                                                        value: context.bloc<InvoiceDetailsBloc>()
+                                                      ),
+                                      BlocProvider.value(
+                                                        value: context.bloc<EditInvoiceBloc>()
+                                                      ),
+                                    ], child: EditInvoice(
+                                balance: state.invoiceInfo.invoiceInfo.balance,
                                 invoice: widget.invoiceID,
-                              ),
-                            ) ));
+                              )
+                            )));
                           },
+                        ) : Tooltip(
+                              message: "Paid Completely",
+                              child: Container(
+                          padding: EdgeInsets.all(10.0),
+                          margin: EdgeInsets.only(left: 12.0),
+                          width: 48.0,
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).primaryColor,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: Colors.grey.withOpacity(0.5),
+                              width: 0.5
+                            )
+                          ),
+                          child: Center(
+                            child: Icon(
+                                Feather.check,
+                                color: Colors.white,
+                                size: 20.0
+                            )
+                          )
                         ),
+                        )
                       ],
                     )
                   )
                 ],
-              ),
-            );
+              );
               } else {
-                return SliverToBoxAdapter(
-                  child: Container()
-                );
+                return Container();
               }
              },
-           ),
+           )))),
             SliverPersistentHeader(
               delegate: SliverHeaderDelegate(
                 tabController: tabController
@@ -196,8 +248,9 @@ class _DetailsState extends State<Details> with SingleTickerProviderStateMixin {
           children: <Widget>[
             BlocBuilder<InvoiceDetailsBloc, InvoiceInfoState>(
               builder: (context, state){
+                print(state);
                 if(state is InvoiceInfoInitialState){
-                  context.bloc<InvoiceDetailsBloc>().add(LoadInvoiceInfo(invoiceID: widget.invoiceID));
+                  detailsBloc.add(LoadInvoiceInfo(invoiceID: widget.invoiceID));
                 }
                 if(state is InvoiceInfoSuccessState){
                   return ListView.builder(
@@ -264,7 +317,7 @@ class _DetailsState extends State<Details> with SingleTickerProviderStateMixin {
               },
             );
                 } else {
-                  return ListView.builder(
+                 return ListView.builder(
                   itemCount: 5,
                   itemBuilder: (context, index){
                     return Container(
@@ -341,6 +394,7 @@ class _DetailsState extends State<Details> with SingleTickerProviderStateMixin {
                   },
                 );
                 }
+                  
               },
             )
           ],

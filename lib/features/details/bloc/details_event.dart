@@ -7,6 +7,13 @@ abstract class InvoiceInfoEvent extends Equatable {
 
 }
 
+class LoadInfoInitial extends InvoiceInfoEvent {
+  const LoadInfoInitial();
+
+  @override
+  List<Object> get props => [];
+}
+
 class LoadInvoiceInfo extends InvoiceInfoEvent {
 
   final String invoiceID;

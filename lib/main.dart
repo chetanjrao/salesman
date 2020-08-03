@@ -7,6 +7,10 @@ import 'package:salesman/features/dashboard/bloc/dashboard_events.dart';
 import 'package:salesman/features/dashboard/bloc/dashboard_state.dart';
 import 'package:salesman/features/dashboard/data/respository/dashboard_repository.dart';
 import 'package:salesman/features/dashboard/ui/dashboard.dart';
+import 'package:salesman/features/details/bloc/details_bloc.dart';
+import 'package:salesman/features/details/data/repository/details_repository.dart';
+import 'package:salesman/features/editinvoice/bloc/editinvoice_bloc.dart';
+import 'package:salesman/features/editinvoice/data/repository/edit_invoice_repository.dart';
 import 'package:salesman/features/invoices/data/repository/invoice_repository.dart';
 import 'package:salesman/features/invoices/ui/invoice.dart';
 import 'package:salesman/features/profile/bloc/profile_bloc.dart';
@@ -55,6 +59,8 @@ class _HomePageState extends State<HomePage> {
   final DashboardRepository dashboardRepository = new DashboardRepository();
   final InvoiceRepository invoiceRepository = new InvoiceRepository();
   final ProfileRepository profileRepository = new ProfileRepository();
+  final InvoiceInfoRepository invoiceInfoRepository = new InvoiceInfoRepository();
+  final EditInvoiceRepository editInvoiceRepository = new EditInvoiceRepository();
 
   void changePage(index){
     setState(() {
@@ -69,19 +75,41 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: Colors.white,
         body: IndexedStack(
           children: <Widget>[
-            BlocProvider(
-              create: (context) => DashboardBloc(dashboardRepository: dashboardRepository),
+            MultiBlocProvider(
+              providers: [
+                BlocProvider(
+                  create: (context) => DashboardBloc(dashboardRepository: dashboardRepository),
+                )
+              ],
               child: Dashboard()
             ),
-            BlocProvider(
-              create: (context) => InvoiceBloc(
-                invoiceRepository: invoiceRepository
-              ),
-              child: Invoice(),
+            MultiBlocProvider(
+              providers: [
+                BlocProvider(
+                  create: (context) => InvoiceBloc(
+                    invoiceRepository: invoiceRepository
+                  ),
+                ),
+                BlocProvider(
+                  create: (context) {
+                    return InvoiceDetailsBloc(invoiceInfoRepository: invoiceInfoRepository
+                  );
+                  },
+                ),
+                BlocProvider(
+                  create: (context) => EditInvoiceBloc(
+                    editInvoiceRepository: editInvoiceRepository
+                  ),
+                )
+              ], 
+              child: Invoice()
             ),
             Transactions(),
-            BlocProvider(
-              create: (context) => ProfileBloc(profileRepository: profileRepository),
+            MultiBlocProvider(
+              providers: [
+                BlocProvider(
+                  create: (context) => ProfileBloc(profileRepository: profileRepository)),
+              ],
               child: Profile(),
             )
           ],
