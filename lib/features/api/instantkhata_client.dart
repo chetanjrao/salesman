@@ -112,4 +112,17 @@ class InstantKhataClient {
     );
   }
 
+  Future<http.Response> getAllTransactions(int distributor){
+    return http.post(
+      "$CONTEXT_API_URL/transactions/all/",
+      headers: {
+        HttpHeaders.authorizationHeader: "Bearer $_accessToken",
+        HttpHeaders.contentTypeHeader: "application/json"
+      },
+      body: jsonEncode({
+        "distributor": distributor
+      })
+    );
+  }
+
 }

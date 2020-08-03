@@ -16,6 +16,8 @@ import 'package:salesman/features/invoices/ui/invoice.dart';
 import 'package:salesman/features/profile/bloc/profile_bloc.dart';
 import 'package:salesman/features/profile/data/respository/profile_repository.dart';
 import 'package:salesman/features/profile/ui/profile.dart';
+import 'package:salesman/features/transactions/bloc/transactions_bloc.dart';
+import 'package:salesman/features/transactions/data/respoitory/transactions.dart';
 import 'package:salesman/features/transactions/ui/transactions.dart';
 
 import 'features/invoices/bloc/invoice_bloc.dart';
@@ -61,6 +63,7 @@ class _HomePageState extends State<HomePage> {
   final ProfileRepository profileRepository = new ProfileRepository();
   final InvoiceInfoRepository invoiceInfoRepository = new InvoiceInfoRepository();
   final EditInvoiceRepository editInvoiceRepository = new EditInvoiceRepository();
+  final TransactionRepository transactionsRepository = new TransactionRepository();
 
   void changePage(index){
     setState(() {
@@ -104,7 +107,12 @@ class _HomePageState extends State<HomePage> {
               ], 
               child: Invoice()
             ),
-            Transactions(),
+            BlocProvider(
+              create: (context) => TransactionsBloc(
+                transactionsRepository
+              ),
+              child: Transactions(),
+            ),
             MultiBlocProvider(
               providers: [
                 BlocProvider(
