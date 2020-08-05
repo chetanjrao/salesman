@@ -6,6 +6,10 @@ import 'package:salesman/features/dashboard/bloc/dashboard_bloc.dart';
 import 'package:salesman/features/dashboard/bloc/dashboard_events.dart';
 import 'package:salesman/features/dashboard/bloc/dashboard_state.dart';
 import 'package:salesman/features/dashboard/data/models/dashboard_models.dart';
+import 'package:salesman/features/inventory/bloc/inventory_bloc.dart';
+import 'package:salesman/features/inventory/bloc/inventory_event.dart';
+import 'package:salesman/features/inventory/bloc/inventory_state.dart';
+import 'package:salesman/features/inventory/data/respository/inventory.dart';
 import 'package:salesman/features/inventory/ui/inventory.dart';
 import 'package:salesman/utils/globals.dart';
 import 'package:shimmer/shimmer.dart';
@@ -18,6 +22,7 @@ class Dashboard extends StatefulWidget {
 class _DashboardState extends State<Dashboard> with SingleTickerProviderStateMixin {
 
   TabController tabController;
+  InventoryRepository inventoryRepository = new InventoryRepository();
 
   @override
   void initState() {
@@ -426,16 +431,28 @@ class _DashboardState extends State<Dashboard> with SingleTickerProviderStateMix
           }
         )
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => Inventory())),
-        backgroundColor: Theme.of(context).primaryColor,
-        child: Center(
-          child:Icon(
-            Feather.shopping_cart,
-            size: 20.0,
+      floatingActionButton: BlocProvider(
+          create: (context) => InventoryBloc(
+            inventoryRepository
+          ),
+          child: FloatingActionButton(
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => 
+            BlocProvider(
+              create: (context) => InventoryBloc(
+                inventoryRepository
+              ),
+              child: Inventory()
+            )
+            )),
+            backgroundColor: Theme.of(context).primaryColor,
+            child: Center(
+              child:Icon(
+                Feather.shopping_cart,
+                size: 20.0,
+              )
+            )
           )
-        )
-      ),
+        ) 
     );
   }
 }

@@ -74,7 +74,6 @@ class _TransactionsState extends State<Transactions> with SingleTickerProviderSt
         }, 
         body: BlocBuilder<TransactionsBloc, TransactionsState>(
           builder: (context, state){
-            print(state);
             if(state is TransactionsInitialState){
               BlocProvider.of<TransactionsBloc>(context).add(LoadAllTransactions(1));
             }
