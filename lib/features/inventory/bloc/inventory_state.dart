@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
+import 'package:salesman/features/editinvoice/data/models/edit_invoice_models.dart';
 import 'package:salesman/features/inventory/data/models/inventory.dart';
+import 'package:salesman/features/inventory/data/models/retailer.dart';
 
 abstract class InventoryState {
   
@@ -44,6 +46,7 @@ class InventoryErrorState extends InventoryState {
 }
 
 class NewInventoryUploadState extends InventoryState {
+  
 
 }
 
@@ -52,5 +55,8 @@ class NewInventoryUploadingState extends InventoryState {
 }
 
 class NewInventoryUploadSucessState extends InventoryState {
+  final String message;
+
+  NewInventoryUploadSucessState(this.message);
   
 }

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:salesman/features/editinvoice/data/models/edit_invoice_models.dart';
+import 'package:salesman/features/inventory/data/models/inventory.dart';
 import 'package:salesman/utils/globals.dart';
 
 class InstantKhataClient {
@@ -136,6 +137,36 @@ class InstantKhataClient {
         "distributor": distributor
       })
     );
+  }
+
+  Future<http.Response> getAllRetailers(int distributor){
+    return http.get(
+      "$CONTEXT_API_URL/retailers/?distributor=$distributor",
+      headers: {
+        HttpHeaders.authorizationHeader: "Bearer $_accessToken",
+        HttpHeaders.contentTypeHeader: "application/json"
+      },
+    );
+  }
+
+  Future<http.Response> createSale(int retailer, int distributor, int paymentMode, double amount, double paid, String deadline, List<Map<String, int>> state){
+    return http.post(
+      "$CONTEXT_API_URL/sales/create/",
+      headers: {
+        HttpHeaders.authorizationHeader: "Bearer $_accessToken",
+        HttpHeaders.contentTypeHeader: "application/json"
+      },
+      body: jsonEncode({
+        "retailer": retailer,
+        "distributor": distributor,
+        "total_amount": amount,
+        "amount_paid": paid,
+        "payment_mode": paymentMode,
+        "deadline": deadline,
+        "sales": state
+      })
+    );
+
   }
 
 }

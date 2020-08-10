@@ -20,7 +20,7 @@ class InventoryModel extends Equatable {
       json["name"],
       json["mrp"],
       json["quantity"],
-      json["quantity"] > 0,
+      json["quantity"] > 0 ? 1 : 0,
       json["type"],
       json["base_price"]
     );

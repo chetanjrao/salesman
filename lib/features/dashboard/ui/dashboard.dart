@@ -9,6 +9,8 @@ import 'package:salesman/features/dashboard/data/models/dashboard_models.dart';
 import 'package:salesman/features/inventory/bloc/inventory_bloc.dart';
 import 'package:salesman/features/inventory/bloc/inventory_event.dart';
 import 'package:salesman/features/inventory/bloc/inventory_state.dart';
+import 'package:salesman/features/inventory/bloc/payment_bloc.dart';
+import 'package:salesman/features/inventory/bloc/retailer_bloc.dart';
 import 'package:salesman/features/inventory/data/respository/inventory.dart';
 import 'package:salesman/features/inventory/ui/inventory.dart';
 import 'package:salesman/utils/globals.dart';
@@ -437,10 +439,24 @@ class _DashboardState extends State<Dashboard> with SingleTickerProviderStateMix
           ),
           child: FloatingActionButton(
             onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => 
-            BlocProvider(
-              create: (context) => InventoryBloc(
-                inventoryRepository
-              ),
+            MultiBlocProvider(
+              providers: [
+                BlocProvider(
+                  create: (context) => InventoryBloc(
+                    inventoryRepository
+                  ),
+                ),
+                BlocProvider(
+                  create: (context) => RetailerBloc(
+                    inventoryRepository
+                  ),
+                ),
+                BlocProvider(
+                  create: (context) => PaymentBloc(
+                    inventoryRepository
+                  ),
+                )
+              ],
               child: Inventory()
             )
             )),
