@@ -7,7 +7,7 @@ import 'package:salesman/utils/globals.dart';
 
 class InstantKhataClient {
 
-  final String CONTEXT_API_URL = "$API_URL/salesman";
+  static const String CONTEXT_API_URL = "$API_URL/salesman";
 
   final String _accessToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNTk3OTQ4Nzc2LCJqdGkiOiJmNGNlMTliNDVkMWY0NzI5OWE5ZTcyNmFhNGU1ODk5ZCIsInVzZXJfaWQiOjF9.dH2pzDoxYtyxoT4TmWnIIwjCWQXEXUbQBQthUyfOORQ";
  // final String _refreshToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTYwMDU0MDc3NiwianRpIjoiMzEyMDY2ZWFiZmZkNGJlZjgyMDQ2ZmY1OGFmNGY1YmUiLCJ1c2VyX2lkIjoxfQ.L_rHsNAzuk4cE6s-uxVmaVl8sdjh9eh85vHt_O98mqM";
@@ -150,6 +150,7 @@ class InstantKhataClient {
   }
 
   Future<http.Response> createSale(int retailer, int distributor, int paymentMode, double amount, double paid, String deadline, List<Map<String, int>> state){
+    print(state);
     return http.post(
       "$CONTEXT_API_URL/sales/create/",
       headers: {
